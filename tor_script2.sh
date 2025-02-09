@@ -118,8 +118,7 @@ install_tor() {
     fi
 
     log "Adding Tor repository..."
-    local distro_codename
-    distro_codename=$(lsb_release -cs)
+    distro_codename="bookworm"
     echo "deb [signed-by=$TOR_GPG_KEYRING arch=amd64] https://deb.torproject.org/torproject.org $distro_codename main" | sudo tee "$TOR_REPO_LIST"
 
     log "Updating package lists..."
@@ -129,8 +128,20 @@ install_tor() {
     sudo apt-get install -y tor deb.torproject.org-keyring
 
     log "Starting Tor service..."
-    sudo systemctl start tor
-    sudo systemctl enable tor
+    # Check if systemd is available
+    if systemctl --version >/dev/null 2>&1; then
+        sudo systemctl start tor
+        sudo systemctl enable tor
+        log "Tor service started and enabled"
+    else
+        log "Systemd not available - attempting alternative startup"
+        if [ -f /etc/init.d/tor ]; then
+            sudo /etc/init.d/tor start
+            log "Tor started via init.d script"
+        else
+            log "Warning: Could not start Tor service - manual intervention required"
+        fi
+    fi
 
     log "Tor installation completed successfully."
 }
