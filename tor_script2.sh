@@ -1,6 +1,6 @@
 #!/bin/bash
 # Tor Installer for Kali Linux/Debian (v2.1)
-# GitHub: https://github.com/yourusername/tor-installer
+# GitHub: https://github.com/coco975/tor_script3.git
 
 # Enable strict error handling
 set -euo pipefail
