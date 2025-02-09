@@ -28,18 +28,6 @@ Feature	Description
 Official Tor Repo	Latest Tor versions from Tor Project (bypass outdated Kali packages)
 Kali Fixes	Forces Debian bookworm compatibility for kali-rolling systems
 Auto-Rollback	Restores system state on failure via backups in ~/tor_backup
-🛠️ Usage
-### Commands
-```bash
-# Install Tor
-./tor_script.sh
-
-# Restore system state
-./tor_script.sh restore
-
-# Full uninstall
-./tor_script.sh uninstall
-```
 ## 🛠️ Usage
 ### Commands
 ```bash
