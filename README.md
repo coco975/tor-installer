@@ -11,11 +11,13 @@ A secure, one-command installer for Tor that automates installation, configurati
 ## 🚀 Quick Start
 
 ### Installation  
-```bash
 # Direct install (Debian/Kali)
+```bash
 curl -sSL https://raw.githubusercontent.com/coco975/tor-installer/main/tor_script.sh | bash
+```
 
 # Or clone and run
+```bash
 git clone https://github.com/coco975/tor-installer.git
 cd tor-installer
 sudo chmod +x tor_script.sh
