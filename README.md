@@ -18,8 +18,8 @@ curl -sSL https://raw.githubusercontent.com/coco975/tor-installer/main/tor_scrip
 # Or clone and run
 git clone https://github.com/coco975/tor-installer.git
 cd tor-installer
-chmod +x tor_script.sh
-sudo ./tor_script.sh
+sudo chmod +x tor_script.sh
+./tor_script.sh
 ```
 ## ✨ Features
 Feature	Description
