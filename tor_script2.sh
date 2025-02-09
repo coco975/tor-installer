@@ -107,12 +107,20 @@ install_tor() {
     install_dependencies
 
     log "Adding Tor Project GPG key..."
-    curl -fsSL https://deb.torproject.org/torproject.org/gpgkey | gpg --dearmor | sudo tee "$TOR_GPG_KEYRING" >/dev/null
+    if ! curl -fsSL https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | gpg --dearmor | sudo tee "$TOR_GPG_KEYRING" >/dev/null; then
+        log "Failed to download and install GPG key"
+        exit 1
+    fi
+
+    if [ ! -f "$TOR_GPG_KEYRING" ]; then
+        log "GPG key file not created"
+        exit 1
+    fi
 
     log "Adding Tor repository..."
     local distro_codename
     distro_codename=$(lsb_release -cs)
-    echo "deb [signed-by=$TOR_GPG_KEYRING] https://deb.torproject.org/torproject.org $distro_codename main" | sudo tee "$TOR_REPO_LIST"
+    echo "deb [signed-by=$TOR_GPG_KEYRING arch=amd64] https://deb.torproject.org/torproject.org $distro_codename main" | sudo tee "$TOR_REPO_LIST"
 
     log "Updating package lists..."
     sudo apt-get update
