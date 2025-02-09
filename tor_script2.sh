@@ -1,4 +1,6 @@
 #!/bin/bash
+# Tor Installer for Kali Linux/Debian (v2.1)
+# GitHub: https://github.com/yourusername/tor-installer
 
 # Enable strict error handling
 set -euo pipefail
@@ -9,8 +11,10 @@ TOR_GPG_KEYRING="/usr/share/keyrings/tor-archive-keyring.gpg"
 BACKUP_DIR="$HOME/tor_backup"
 LOG_FILE="$HOME/tor_install.log"
 PKG_STATE_FILE="$BACKUP_DIR/pkg_state.txt"
-
+SUPPORTED_DISTRO="bookworm"
 # Functions
+exec > >(tee -a "$LOG_FILE") 2>&1
+
 log() {
     echo "$(date +'%Y-%m-%d %H:%M:%S') - $1" | tee -a "$LOG_FILE"
 }
