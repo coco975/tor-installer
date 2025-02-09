@@ -30,27 +30,29 @@ Kali Fixes	Forces Debian bookworm compatibility for kali-rolling systems
 Auto-Rollback	Restores system state on failure via backups in ~/tor_backup
 ## 🛠️ Usage
 ### Commands
+
+### Install Tor
 ```bash
-# Install Tor
 ./tor_script.sh
-
-# Restore system state
+```
+### Restore system state
+```bash
 ./tor_script.sh restore
-
-# Full uninstall
+```
+### Full uninstall
+```Bash
 ./tor_script.sh uninstall
 ```
 ## 🔐 Security
 ### GPG Key Verification
+#### Tor Project's official key
 ```bash
-# Tor Project's official key
 Key Fingerprint: A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89
 ```
 ### Logging
 ### All actions are logged to:
-```bash
-~/tor_install.log
-```
+_~/tor_install.log_
+
 ## 🐛 Kali Linux Optimization
 Workflow Example
 Install Tor:
@@ -67,18 +69,38 @@ torsocks nmap -sT -Pn example.com
 ```
 ## 🔧 Troubleshooting
 ### Service Issues
-```bash
-# For non-systemd systems (e.g., Docker)
-sudo /etc/init.d/tor start
 
-# View logs
+### For non-systemd systems (e.g., Docker)
+```bash
+sudo /etc/init.d/tor start
+```
+### View logs
+```bash
 journalctl -u tor.service
 ```
 ### Repository Fixes
+### Remove corrupted repo
 ```bash
-# Remove corrupted repo
 sudo rm /etc/apt/sources.list.d/tor.list
 sudo apt update
+```
+### Stop the Tor Service
+```bash
+sudo systemctl stop tor
+```
+### Start the Tor service
+```bash
+sudo systemctl stop tor
+```
+### Disable Tor from Starting at Boot (Optional)
+### To prevent Tor from running on startup, disable it with:
+```bash
+sudo systemctl disable tor
+```
+## Verify Tor is Stopped or Running 
+### Check if Tor is running with:
+```bash
+systemctl status tor
 ```
 ### 🤝 Contributing
 Fork the repository
