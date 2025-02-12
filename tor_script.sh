@@ -132,24 +132,41 @@ install_tor() {
     sudo apt-get install -y tor deb.torproject.org-keyring
 
     log "Starting Tor service..."
-    # Check if systemd is available
-    if systemctl --version >/dev/null 2>&1; then
+    # Enhanced systemd detection
+    if command -v systemctl >/dev/null 2>&1 && systemctl --version >/dev/null 2>&1; then
         sudo systemctl start tor
         sudo systemctl enable tor
-        log "Tor service started and enabled"
+        log "Tor service successfully started and enabled via systemd"
     else
-        log "Systemd not available - attempting alternative startup"
+        log "Systemd not available - attempting alternative startup methods"
+        
+        # Try init.d script
         if [ -f /etc/init.d/tor ]; then
             sudo /etc/init.d/tor start
             log "Tor started via init.d script"
+            
+            # Verify it's actually running
+            if ! pgrep -x "tor" >/dev/null; then
+                log "Tor failed to start via init.d script"
+                log "Attempting to start Tor directly..."
+                sudo tor --runasdaemon 1
+            fi
         else
-            log "Warning: Could not start Tor service - manual intervention required"
+            log "No init.d script found - starting Tor directly"
+            sudo tor --runasdaemon 1
+        fi
+        
+        # Final verification
+        if pgrep -x "tor" >/dev/null; then
+            log "Tor is running (PID: $(pgrep -x "tor"))"
+        else
+            log "Warning: Could not verify Tor is running"
+            log "You may need to start manually: tor --runasdaemon 0"
         fi
     fi
 
     log "Tor installation completed successfully."
 }
-
 uninstall_tor() {
     log "Starting Tor uninstallation..."
     
