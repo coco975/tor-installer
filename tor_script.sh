@@ -105,68 +105,73 @@ install_dependencies() {
     done
 }
 
+#!/bin/bash
+
+# ... [Keep previous variables and functions unchanged] ...
+
 install_tor() {
     log "Starting Tor installation..."
     
     install_dependencies
 
-    log "Adding Tor Project GPG key..."
-    if ! curl -fsSL https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | gpg --dearmor | sudo tee "$TOR_GPG_KEYRING" >/dev/null; then
-        log "Failed to download and install GPG key"
-        exit 1
+    # Check if we're in WSL and configure systemd
+    if uname -a | grep -qi 'microsoft'; then
+        log "Detected WSL environment"
+        WSL_CONF="/etc/wsl.conf"
+        
+        # Backup existing wsl.conf
+        if [ -f "$WSL_CONF" ]; then
+            log "Backing up existing wsl.conf"
+            sudo cp "$WSL_CONF" "$WSL_CONF.bak"
+        fi
+
+        # Add systemd configuration
+        if ! grep -q '^\[boot\]' "$WSL_CONF" 2>/dev/null || ! grep -q '^systemd=true' "$WSL_CONF" 2>/dev/null; then
+            log "Configuring WSL for systemd support"
+            echo -e "\n[boot]\nsystemd=true" | sudo tee -a "$WSL_CONF" >/dev/null
+            log "--------------------------------------------------"
+            log "WSL configuration updated. You MUST restart WSL with:"
+            log "1. Close this terminal"
+            log "2. Run in PowerShell: wsl --shutdown"
+            log "3. Restart WSL"
+            log "4. Rerun this script after reboot"
+            log "--------------------------------------------------"
+            exit 0
+        else
+            log "Systemd already configured in wsl.conf"
+        fi
     fi
 
-    if [ ! -f "$TOR_GPG_KEYRING" ]; then
-        log "GPG key file not created"
-        exit 1
-    fi
-
-    log "Adding Tor repository..."
-    distro_codename="bookworm"
-    echo "deb [signed-by=$TOR_GPG_KEYRING arch=amd64] https://deb.torproject.org/torproject.org $distro_codename main" | sudo tee "$TOR_REPO_LIST"
-
-    log "Updating package lists..."
-    sudo apt-get update
-
-    log "Installing Tor packages..."
-    sudo apt-get install -y tor deb.torproject.org-keyring
+    # ... [Keep previous GPG/repository/installation steps unchanged] ...
 
     log "Starting Tor service..."
-    # Enhanced systemd detection
+    # Enhanced service management
     if command -v systemctl >/dev/null 2>&1 && systemctl --version >/dev/null 2>&1; then
-        sudo systemctl start tor
-        sudo systemctl enable tor
-        log "Tor service successfully started and enabled via systemd"
+        sudo systemctl start tor && sudo systemctl enable tor
+        log "Tor service managed via systemd"
+    elif [ -f /etc/init.d/tor ]; then
+        sudo /etc/init.d/tor start
+        log "Tor started via init.d"
+    elif command -v tor >/dev/null 2>&1; then
+        log "Starting Tor directly"
+        sudo tor --runasdaemon 1
     else
-        log "Systemd not available - attempting alternative startup methods"
-        
-        # Try init.d script
-        if [ -f /etc/init.d/tor ]; then
-            sudo /etc/init.d/tor start
-            log "Tor started via init.d script"
-            
-            # Verify it's actually running
-            if ! pgrep -x "tor" >/dev/null; then
-                log "Tor failed to start via init.d script"
-                log "Attempting to start Tor directly..."
-                sudo tor --runasdaemon 1
-            fi
-        else
-            log "No init.d script found - starting Tor directly"
-            sudo tor --runasdaemon 1
-        fi
-        
-        # Final verification
-        if pgrep -x "tor" >/dev/null; then
-            log "Tor is running (PID: $(pgrep -x "tor"))"
-        else
-            log "Warning: Could not verify Tor is running"
-            log "You may need to start manually: tor --runasdaemon 0"
-        fi
+        log "ERROR: Failed to start Tor through all methods"
+        log "Try manual start with: tor --runasdaemon 0"
+        exit 1
+    fi
+
+    # Verify Tor is running
+    if pgrep -x "tor" >/dev/null; then
+        log "Tor successfully running (PID: $(pgrep -x "tor"))"
+    else
+        log "WARNING: Tor process not found - may require manual start"
     fi
 
     log "Tor installation completed successfully."
 }
+
+# ... [Keep rest of script unchanged] ...
 uninstall_tor() {
     log "Starting Tor uninstallation..."
     
